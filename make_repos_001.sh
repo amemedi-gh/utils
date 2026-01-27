@@ -1,13 +1,21 @@
 #!/bin/bash
-### Create github repos from repo directories
+
+# Script to create GitHub Enterprise repositories
+
 set -e
 
+# ===== CONFIGURATION - UPDATE THESE VALUES =====
 SOURCE_DIR="github_ready"
 GITHUB_ORG="primecorpbc"
 GITHUB_TOKEN="YOUR_GITHUB_TOKEN"
 GITHUB_DOMAIN="github.primecorpbc.ca"
 VISIBILITY="public"  # private or public
 # ===============================================
+
+echo "================================"
+echo "Create GitHub Repositories"
+echo "================================"
+echo ""
 
 if [ ! -d "$SOURCE_DIR" ]; then
     echo "Error: Source directory '$SOURCE_DIR' not found"
@@ -20,7 +28,7 @@ echo "Organization: $GITHUB_ORG"
 echo "Visibility: $VISIBILITY"
 echo ""
 
-# Count repos
+# Count repositories
 repo_count=$(find "$SOURCE_DIR" -mindepth 2 -maxdepth 2 -type d | wc -l)
 echo "Found $repo_count repositories to create"
 echo ""
@@ -33,11 +41,6 @@ if [[ ! $REPLY =~ ^[Yy]$ ]]; then
 fi
 
 echo ""
-
-# Log file
-LOG_FILE="$SOURCE_DIR/create_repos_log_$(date +%Y%m%d_%H%M%S).txt"
-echo "Repo creation started: $(date)" > "$LOG_FILE"
-echo "" >> "$LOG_FILE"
 
 created_count=0
 exists_count=0
@@ -55,7 +58,7 @@ for org_dir in "$SOURCE_DIR"/*; do
         continue
     fi
     
-    # Process each repo
+    # Process each repository
     for repo_dir in "$org_dir"/*; do
         if [ ! -d "$repo_dir" ]; then
             continue
@@ -73,7 +76,6 @@ for org_dir in "$SOURCE_DIR"/*; do
         
         if [ "$http_code" = "200" ]; then
             echo "  Already exists"
-            echo "EXISTS: $full_repo_name" >> "$LOG_FILE"
             ((exists_count++))
         elif [ "$http_code" = "404" ]; then
             echo "  Creating..."
@@ -89,26 +91,24 @@ for org_dir in "$SOURCE_DIR"/*; do
             
             if [ "$create_http_code" = "201" ]; then
                 echo "  Created successfully"
-                echo "CREATED: $full_repo_name" >> "$LOG_FILE"
                 ((created_count++))
             else
                 echo "  Failed (HTTP $create_http_code)"
-                echo "ERROR: $full_repo_name (HTTP $create_http_code)" >> "$LOG_FILE"
-                echo "$create_response" >> "$LOG_FILE"
                 ((error_count++))
             fi
         else
             echo "  API error (HTTP $http_code)"
-            echo "ERROR: $full_repo_name (HTTP $http_code)" >> "$LOG_FILE"
             ((error_count++))
         fi
     done
 done
 
+echo ""
 echo "================================"
 echo "Complete"
 echo "================================"
+echo ""
 echo "Created: $created_count"
 echo "Already existed: $exists_count"
 echo "Errors: $error_count"
-echo "Log: $LOG_FILE"
+echo ""
