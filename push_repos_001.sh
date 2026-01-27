@@ -1,6 +1,6 @@
 #!/bin/bash
 
-### Push local repos to gh enterprise (assumes repos exis)
+# Script to push local repos to GitHub Enterprise
 
 set -e
 
@@ -14,6 +14,7 @@ GITHUB_DOMAIN="github.primecorpbc.ca"
 echo "================================"
 echo "Push to GitHub"
 echo "================================"
+echo ""
 
 if [ ! -d "$SOURCE_DIR" ]; then
     echo "Error: Source directory '$SOURCE_DIR' not found"
@@ -38,11 +39,6 @@ if [[ ! $REPLY =~ ^[Yy]$ ]]; then
 fi
 
 echo ""
-
-# Log file
-LOG_FILE="$SOURCE_DIR/push_log_$(date +%Y%m%d_%H%M%S).txt"
-echo "Push started: $(date)" > "$LOG_FILE"
-echo "" >> "$LOG_FILE"
 
 success_count=0
 error_count=0
@@ -79,7 +75,6 @@ for org_dir in "$SOURCE_DIR"/*; do
         # Verify .git directory exists
         if [ ! -d .git ]; then
             echo "  No .git directory, skipping"
-            echo "SKIPPED: $full_repo_name (no .git)" >> "$LOG_FILE"
             ((skipped_count++))
             cd "$STARTING_DIR"
             continue
@@ -95,13 +90,11 @@ for org_dir in "$SOURCE_DIR"/*; do
         fi
         
         # Push all branches and tags
-        if git push --all origin 2>> "$LOG_FILE" && git push --tags origin 2>> "$LOG_FILE"; then
+        if git push --all origin 2>&1 && git push --tags origin 2>&1; then
             echo "  Success"
-            echo "SUCCESS: $full_repo_name" >> "$LOG_FILE"
             ((success_count++))
         else
             echo "  Failed"
-            echo "ERROR: $full_repo_name (push failed)" >> "$LOG_FILE"
             ((error_count++))
         fi
         
@@ -109,10 +102,12 @@ for org_dir in "$SOURCE_DIR"/*; do
     done
 done
 
+echo ""
 echo "================================"
 echo "Complete"
 echo "================================"
+echo ""
 echo "Success: $success_count"
 echo "Errors: $error_count"
 echo "Skipped: $skipped_count"
-echo "Log: $LOG_FILE"
+echo ""
