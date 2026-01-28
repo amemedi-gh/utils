@@ -1,28 +1,45 @@
 Before resorting to pushing branches individually, troubleshoot why --mirror isn't working. This is unusual because --mirror should be pretty foolproof.
 First, verify what you actually have locally:
-bash# Show ALL branches (local and remote-tracking)
+
+>>>Show ALL branches (local and remote-tracking)
 git branch -a
 
-# Show just local branches
+>>>Show just local branches
 git branch
 
-# Show remote-tracking branches
+>>>Show remote-tracking branches
 git branch -r
-My suspicion: When you cloned from GitLab, you might only have gotten the default branch. GitLab clones don't automatically create local branches for all remote branches - they just create remote-tracking references.
+
+
+Suspicion: 
+When you cloned from GitLab, you might only have gotten the default branch. GitLab clones don't automatically create local branches for all remote branches - they just create remote-tracking references.
+
+
 Check your clone command - did you use:
-bashgit clone <url>  # Only creates local branch for default branch
-Or:
-bashgit clone --mirror <url>  # Gets everything
-If git branch -a shows branches like remotes/origin/feature-branch but git branch only shows main, that's your problem. You need to checkout all those remote branches as local branches before pushing.
+git clone <url>  # Only creates local branch for default branch
+
+OR:
+
+git clone --mirror <url>  # Gets everything
+
+
+If git branch -a shows branches like:
+
+remotes/origin/feature-branch 
+
+but git branch only shows main, that's your problem. You need to checkout all those remote branches as local branches before pushing.
+
 Try this:
-bash# Fetch all branches
+>>>Fetch all branches
 git fetch --all
 
-# Create local branches from all remote branches
+>>>Create local branches from all remote branches
 for branch in $(git branch -r | grep -v '\->' | grep -v 'HEAD'); do
     git branch --track ${branch#origin/} $branch 2>/dev/null || true
 done
 
-# Now try mirror
+>>>Now try mirror
 git push --mirror
+
+
 What does git branch -a show? That will tell us what's actually in your local clone.
