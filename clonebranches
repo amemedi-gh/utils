@@ -15,7 +15,9 @@ Suspicion:
 When you cloned from GitLab, you might only have gotten the default branch. GitLab clones don't automatically create local branches for all remote branches - they just create remote-tracking references.
 
 
-Check your clone command - did you use:
+>>>Check your clone command
+Did you use:
+
 git clone <url>  # Only creates local branch for default branch
 
 OR:
@@ -27,7 +29,7 @@ If git branch -a shows branches like:
 
 remotes/origin/feature-branch 
 
-but git branch only shows main, that's your problem. You need to checkout all those remote branches as local branches before pushing.
+but git branch only shows main, that's the problem. You need to checkout all those remote branches as local branches before pushing.
 
 Try this:
 >>>Fetch all branches
