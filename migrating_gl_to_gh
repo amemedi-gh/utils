@@ -1,0 +1,17 @@
+#Clone the repo
+git clone --mirror https://oath2:TOKEN@DOMAIN/ORG/REPO.git
+cd REPO.git
+
+#delete references 
+git for-each-ref --format='delete %(refname)' refs/merge-requests | git update-ref --stdin
+
+# Create the repo on github via UI or REST api
+
+#set or add origin
+git remote set-url origin https://TOKEN@DOMAIN/ORG/REPO.git
+
+#push the repo to github
+git push --mirror
+
+#list the remote origin, it should show the branches
+git ls-remote origin
